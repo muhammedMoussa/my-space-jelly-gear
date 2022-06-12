@@ -1,15 +1,15 @@
-import Head from 'next/head'
-import Link from 'next/link';
+/* eslint-disable @next/next/no-img-element */
+import Head from "next/head";
+import Link from "next/link";
+import { ApolloClient, InMemoryCache, gql } from "@apollo/client";
 
-import Layout from '@components/Layout';
-import Container from '@components/Container';
-import Button from '@components/Button';
+import Layout from "@components/Layout";
+import Container from "@components/Container";
+import Button from "@components/Button";
 
-import products from '@data/products';
+import styles from "@styles/Page.module.scss";
 
-import styles from '@styles/Page.module.scss'
-
-export default function Home() {
+export default function Home({ home, products }) {
   return (
     <Layout>
       <Head>
@@ -21,13 +21,19 @@ export default function Home() {
         <h1 className="sr-only">Space Jelly Gear</h1>
 
         <div className={styles.hero}>
-          <Link href="#">
+          <Link href={home.heroLink}>
             <a>
               <div className={styles.heroContent}>
-                <h2>Prepare for liftoff.</h2>
-                <p>Apparel that&apos;s out of this world!</p>
+                <h2>{home.heroTitle}</h2>
+                <p>{home.heroText}</p>
               </div>
-              <img className={styles.heroImage} src="/images/space-jelly-gear-banner.jpg" alt="" />
+              <img
+                className={styles.heroImage}
+                src={home.heroBackground.url}
+                alt=""
+                width={home.heroBackground.width}
+                height={home.heroBackground.height}
+              />
             </a>
           </Link>
         </div>
@@ -35,32 +41,70 @@ export default function Home() {
         <h2 className={styles.heading}>Featured Gear</h2>
 
         <ul className={styles.products}>
-          {products.slice(0, 4).map(product => {
+          {products.map((product) => {
             return (
               <li key={product.id}>
                 <Link href="#">
                   <a>
                     <div className={styles.productImage}>
-                      <img width="500" height="500" src={product.image} alt="" />
+                      <img
+                        width={product.image.width}
+                        height={product.image.height}
+                        src={product.image.url}
+                        alt=""
+                      />
                     </div>
-                    <h3 className={styles.productTitle}>
-                      { product.name }
-                    </h3>
-                    <p className={styles.productPrice}>
-                      ${ product.price }
-                    </p>
+                    <h3 className={styles.productTitle}>{product.name}</h3>
+                    <p className={styles.productPrice}>${product.price}</p>
                   </a>
                 </Link>
                 <p>
-                  <Button>
-                    Add to Cart
-                  </Button>
+                  <Button>Add to Cart</Button>
                 </p>
               </li>
-            )
+            );
           })}
         </ul>
       </Container>
     </Layout>
-  )
+  );
+}
+
+export async function getStaticProps() {
+  const client = new ApolloClient({
+    uri: "https://api-eu-central-1.graphcms.com/v2/cl4ajtn2829t201z606wk168m/master",
+    cache: new InMemoryCache(),
+  });
+
+  const data = await client.query({
+    query: gql`
+      query MyQuery {
+        page(where: { slug: "home" }) {
+          heroLink
+          heroText
+          heroTitle
+          heroBackground
+        }
+
+        products(first: 4) {
+          id
+          image
+          name
+          price
+          slug
+        }
+      }
+
+    `,
+  });
+
+  const home = data.data.page;
+  const products = data.data.products;
+
+  return {
+    props: {
+      home,
+      products
+    },
+  };
 }
