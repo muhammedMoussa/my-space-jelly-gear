@@ -44,7 +44,7 @@ export default function Home({ home, products }) {
           {products.map((product) => {
             return (
               <li key={product.id}>
-                <Link href="#">
+                <Link href={`products/${product.slug}`}>
                   <a>
                     <div className={styles.productImage}>
                       <img
