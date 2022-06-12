@@ -100,5 +100,3 @@ window.SnipcartSettings = {
         (t.dataset.templatesUrl = window.SnipcartSettings.templatesUrl));
   }
 })();
-
-console.log('SnipCart added..')

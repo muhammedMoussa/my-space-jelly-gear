@@ -82,7 +82,6 @@ export async function getStaticProps({ params }) {
   });
 
   const product = data.data.product;
-  console.log(product);
   return {
     props: {
       product,
